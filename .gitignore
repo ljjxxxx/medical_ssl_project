@@ -1,0 +1,38 @@
+# 数据集文件夹
+datasets/
+datasets/chestxray14/
+
+# 模型检查点（可能很大）
+checkpoints/
+*.pt
+
+# 生成的图像
+examples/
+*.png
+
+# Python缓存文件
+__pycache__/
+*.py[cod]
+*$py.class
+
+# 虚拟环境
+venv/
+env/
+.env/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# 操作系统文件
+.DS_Store
+Thumbs.db
+
+# 日志文件
+*.log
+
+# 临时上传文件
+temp_upload.png
+
+# JetBrains IDE配置文件
+.idea/
+.idea*
