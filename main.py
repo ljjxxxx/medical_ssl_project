@@ -10,6 +10,9 @@ import time
 import json
 from tqdm import tqdm
 import matplotlib.pyplot as plt
+import matplotlib
+
+matplotlib.use('Agg')  # Set the backend to Agg for server environments
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix, roc_auc_score, \
     average_precision_score
 
@@ -27,24 +30,24 @@ def get_available_device():
             try:
                 test_tensor = torch.zeros(1, device="mps")
                 mps_available = True
-                logger.info("MPS加速可用且正常工作")
+                logger.info("MPS acceleration available and working")
                 return torch.device("mps")
             except RuntimeError as e:
-                logger.warning(f"MPS报告可用但失败: {e}")
-                logger.warning("回退到CPU")
+                logger.warning(f"MPS reported available but failed: {e}")
+                logger.warning("Falling back to CPU")
         else:
             if torch.backends.mps.is_available():
-                logger.warning("MPS可用但PyTorch未使用MPS支持构建")
+                logger.warning("MPS available but PyTorch was not built with MPS support")
             else:
-                logger.info("MPS加速在此系统上不可用")
+                logger.info("MPS acceleration not available on this system")
     except AttributeError:
-        logger.warning("PyTorch版本不支持MPS")
+        logger.warning("PyTorch version does not support MPS")
 
     if torch.cuda.is_available():
-        logger.info("CUDA加速可用")
+        logger.info("CUDA acceleration available")
         return torch.device("cuda")
 
-    logger.info("使用CPU进行计算（无GPU加速可用）")
+    logger.info("Using CPU for computation (no GPU acceleration available)")
     return torch.device("cpu")
 
 
@@ -56,7 +59,7 @@ def set_seed(seed=42):
 
 
 def train_ssl_model(model, train_loader, val_loader, optimizer, device, config, resume=False):
-    logger.info("开始SSL模型训练")
+    logger.info("Starting SSL model training")
 
     epochs = config['ssl_epochs']
     checkpoint_dir = Path(config['checkpoint_dir'])
@@ -72,7 +75,7 @@ def train_ssl_model(model, train_loader, val_loader, optimizer, device, config, 
     start_epoch = 0
 
     if resume and last_model_path.exists() and train_state_path.exists():
-        logger.info(f"正在从 {last_model_path} 恢复训练")
+        logger.info(f"Resuming training from {last_model_path}")
 
         checkpoint = torch.load(last_model_path, map_location=device)
         model.load_state_dict(checkpoint['model_state_dict'])
@@ -86,9 +89,9 @@ def train_ssl_model(model, train_loader, val_loader, optimizer, device, config, 
         val_losses = train_state['val_losses']
         best_val_loss = train_state['best_val_loss']
 
-        logger.info(f"恢复训练从epoch {start_epoch}/{epochs}")
+        logger.info(f"Resuming training from epoch {start_epoch}/{epochs}")
     else:
-        logger.info("从头开始训练")
+        logger.info("Starting training from scratch")
 
     model.train()
     start_time = time.time()
@@ -148,7 +151,7 @@ def train_ssl_model(model, train_loader, val_loader, optimizer, device, config, 
                     'loss': best_val_loss,
                 }
                 torch.save(checkpoint, best_model_path)
-                logger.info(f"保存了最佳模型，验证损失: {best_val_loss:.4f}")
+                logger.info(f"Saved best model, validation loss: {best_val_loss:.4f}")
 
             checkpoint = {
                 'epoch': epoch + 1,
@@ -173,7 +176,7 @@ def train_ssl_model(model, train_loader, val_loader, optimizer, device, config, 
                 torch.save(checkpoint, checkpoint_dir / f'ssl_model_epoch_{epoch + 1}.pt')
 
     except KeyboardInterrupt:
-        logger.info("训练被用户中断！保存当前状态以便稍后恢复...")
+        logger.info("Training interrupted by user! Saving current state for later resumption...")
         checkpoint = {
             'epoch': epoch,
             'model_state_dict': model.state_dict(),
@@ -193,17 +196,17 @@ def train_ssl_model(model, train_loader, val_loader, optimizer, device, config, 
         with open(train_state_path, 'w') as f:
             json.dump(train_state, f)
 
-        logger.info(f"已保存中断检查点，可以使用 --resume 参数恢复训练")
+        logger.info(f"Saved interrupt checkpoint, can resume training with --resume flag")
         return model
 
     plt.switch_backend('agg')
 
     plt.figure(figsize=(10, 6))
-    plt.plot(train_losses, label='训练损失')
-    plt.plot(val_losses, label='验证损失')
+    plt.plot(train_losses, label='Training Loss')
+    plt.plot(val_losses, label='Validation Loss')
     plt.xlabel('Epoch')
-    plt.ylabel('损失')
-    plt.title('SSL训练损失')
+    plt.ylabel('Loss')
+    plt.title('SSL Training Loss')
     plt.legend()
     plt.grid(True, alpha=0.3)
     plt.savefig(checkpoint_dir / 'ssl_training_curve.png')
@@ -212,14 +215,14 @@ def train_ssl_model(model, train_loader, val_loader, optimizer, device, config, 
     torch.save(model.state_dict(), checkpoint_dir / 'final_ssl_model.pt')
 
     training_time = time.time() - start_time
-    logger.info(f"SSL训练完成，用时 {training_time / 60:.2f} 分钟")
+    logger.info(f"SSL training completed in {training_time / 60:.2f} minutes")
 
     return model
 
 
 def train_classifier(model, train_loader, val_loader, optimizer, criterion, device, config, disease_labels,
                      resume=False):
-    logger.info("开始分类器训练")
+    logger.info("Starting classifier training")
 
     epochs = config['finetune_epochs']
     checkpoint_dir = Path(config['checkpoint_dir'])
@@ -236,7 +239,7 @@ def train_classifier(model, train_loader, val_loader, optimizer, criterion, devi
     start_epoch = 0
 
     if resume and last_model_path.exists() and train_state_path.exists():
-        logger.info(f"正在从 {last_model_path} 恢复训练")
+        logger.info(f"Resuming training from {last_model_path}")
 
         checkpoint = torch.load(last_model_path, map_location=device)
         model.load_state_dict(checkpoint['model_state_dict'])
@@ -251,9 +254,9 @@ def train_classifier(model, train_loader, val_loader, optimizer, criterion, devi
         val_metrics = train_state['val_metrics']
         best_val_metric = train_state['best_val_metric']
 
-        logger.info(f"恢复训练从epoch {start_epoch}/{epochs}")
+        logger.info(f"Resuming training from epoch {start_epoch}/{epochs}")
     else:
-        logger.info("从头开始训练")
+        logger.info("Starting training from scratch")
 
     start_time = time.time()
 
@@ -358,7 +361,7 @@ def train_classifier(model, train_loader, val_loader, optimizer, criterion, devi
                     'auc': metrics['auc']
                 }
                 torch.save(checkpoint, best_model_path)
-                logger.info(f"保存了最佳模型，验证F1: {metrics['f1']:.4f}, AUC: {metrics['auc']:.4f}")
+                logger.info(f"Saved best model, validation F1: {metrics['f1']:.4f}, AUC: {metrics['auc']:.4f}")
 
             checkpoint = {
                 'epoch': epoch + 1,
@@ -385,7 +388,7 @@ def train_classifier(model, train_loader, val_loader, optimizer, criterion, devi
                 torch.save(checkpoint, checkpoint_dir / f'classifier_model_epoch_{epoch + 1}.pt')
 
     except KeyboardInterrupt:
-        logger.info("训练被用户中断！保存当前状态以便稍后恢复...")
+        logger.info("Training interrupted by user! Saving current state for later resumption...")
         checkpoint = {
             'epoch': epoch,
             'model_state_dict': model.state_dict(),
@@ -407,7 +410,7 @@ def train_classifier(model, train_loader, val_loader, optimizer, criterion, devi
         with open(train_state_path, 'w') as f:
             json.dump(train_state, f)
 
-        logger.info(f"已保存中断检查点，可以使用 --resume 参数恢复训练")
+        logger.info(f"Saved interrupt checkpoint, can resume training with --resume flag")
         return model
 
     plt.switch_backend('agg')
@@ -415,29 +418,29 @@ def train_classifier(model, train_loader, val_loader, optimizer, criterion, devi
     plt.figure(figsize=(12, 8))
 
     plt.subplot(2, 2, 1)
-    plt.plot(train_losses, label='训练损失')
-    plt.plot(val_losses, label='验证损失')
+    plt.plot(train_losses, label='Training Loss')
+    plt.plot(val_losses, label='Validation Loss')
     plt.xlabel('Epoch')
-    plt.ylabel('损失')
-    plt.title('训练损失')
+    plt.ylabel('Loss')
+    plt.title('Training Loss')
     plt.legend()
     plt.grid(True, alpha=0.3)
 
     plt.subplot(2, 2, 2)
-    plt.plot([m['f1'] for m in val_metrics], label='F1分数')
-    plt.plot([m['accuracy'] for m in val_metrics], label='准确率')
+    plt.plot([m['f1'] for m in val_metrics], label='F1 Score')
+    plt.plot([m['accuracy'] for m in val_metrics], label='Accuracy')
     plt.xlabel('Epoch')
-    plt.ylabel('分数')
-    plt.title('F1和准确率')
+    plt.ylabel('Score')
+    plt.title('F1 and Accuracy')
     plt.legend()
     plt.grid(True, alpha=0.3)
 
     plt.subplot(2, 2, 3)
-    plt.plot([m['precision'] for m in val_metrics], label='精确率')
-    plt.plot([m['recall'] for m in val_metrics], label='召回率')
+    plt.plot([m['precision'] for m in val_metrics], label='Precision')
+    plt.plot([m['recall'] for m in val_metrics], label='Recall')
     plt.xlabel('Epoch')
-    plt.ylabel('分数')
-    plt.title('精确率和召回率')
+    plt.ylabel('Score')
+    plt.title('Precision and Recall')
     plt.legend()
     plt.grid(True, alpha=0.3)
 
@@ -445,7 +448,7 @@ def train_classifier(model, train_loader, val_loader, optimizer, criterion, devi
     plt.plot([m['auc'] for m in val_metrics], label='AUC')
     plt.xlabel('Epoch')
     plt.ylabel('AUC')
-    plt.title('ROC曲线下面积')
+    plt.title('Area Under ROC Curve')
     plt.legend()
     plt.grid(True, alpha=0.3)
 
@@ -454,24 +457,24 @@ def train_classifier(model, train_loader, val_loader, optimizer, criterion, devi
     plt.close()
 
     with open(checkpoint_dir / 'disease_metrics.txt', 'w') as f:
-        f.write("疾病指标汇总（最佳模型）:\n\n")
-        f.write(f"整体F1分数: {best_val_metric:.4f}\n")
-        f.write(f"整体AUC: {val_metrics[-1]['auc']:.4f}\n\n")
-        f.write("每个疾病的指标:\n")
+        f.write("Disease Metrics Summary (Best Model):\n\n")
+        f.write(f"Overall F1 Score: {best_val_metric:.4f}\n")
+        f.write(f"Overall AUC: {val_metrics[-1]['auc']:.4f}\n\n")
+        f.write("Metrics for each disease:\n")
         for disease, metric in val_metrics[-1]['per_disease'].items():
             f.write(f"{disease}:\n")
-            f.write(f"  精确率: {metric['precision']:.4f}\n")
-            f.write(f"  召回率: {metric['recall']:.4f}\n")
-            f.write(f"  F1分数: {metric['f1']:.4f}\n\n")
+            f.write(f"  Precision: {metric['precision']:.4f}\n")
+            f.write(f"  Recall: {metric['recall']:.4f}\n")
+            f.write(f"  F1 Score: {metric['f1']:.4f}\n\n")
 
     training_time = time.time() - start_time
-    logger.info(f"分类器训练完成，用时 {training_time / 60:.2f} 分钟")
+    logger.info(f"Classifier training completed in {training_time / 60:.2f} minutes")
 
     return model
 
 
 def evaluate_model(model, test_loader, device, disease_labels):
-    logger.info("在测试集上评估模型")
+    logger.info("Evaluating model on test set")
 
     model.eval()
     all_logits = []
@@ -480,14 +483,14 @@ def evaluate_model(model, test_loader, device, disease_labels):
     all_labels = []
 
     with torch.no_grad():
-        for batch in tqdm(test_loader, desc="测试中"):
+        for batch in tqdm(test_loader, desc="Testing"):
             images = batch['image'].to(device)
             labels = batch['label'].to(device)
 
             outputs = model(images)
             logits = outputs['logits']
 
-            # 计算概率和预测
+            # Calculate probabilities and predictions
             probs = torch.sigmoid(logits)
             preds = (probs >= 0.5).float()
 
@@ -530,18 +533,18 @@ def evaluate_model(model, test_loader, device, disease_labels):
 
     metrics['avg_auc'] = avg_auc / num_diseases
 
-    logger.info(f"测试准确率: {metrics['accuracy']:.4f}")
-    logger.info(f"测试精确率: {metrics['precision']:.4f}")
-    logger.info(f"测试召回率: {metrics['recall']:.4f}")
-    logger.info(f"测试F1分数: {metrics['f1']:.4f}")
-    logger.info(f"测试平均AUC: {metrics['avg_auc']:.4f}")
+    logger.info(f"Test Accuracy: {metrics['accuracy']:.4f}")
+    logger.info(f"Test Precision: {metrics['precision']:.4f}")
+    logger.info(f"Test Recall: {metrics['recall']:.4f}")
+    logger.info(f"Test F1 Score: {metrics['f1']:.4f}")
+    logger.info(f"Test Average AUC: {metrics['avg_auc']:.4f}")
 
-    logger.info("每个疾病的指标:")
+    logger.info("Metrics for each disease:")
     for disease, metric in disease_metrics.items():
         logger.info(f"{disease}:")
-        logger.info(f"  精确率: {metric['precision']:.4f}")
-        logger.info(f"  召回率: {metric['recall']:.4f}")
-        logger.info(f"  F1分数: {metric['f1']:.4f}")
+        logger.info(f"  Precision: {metric['precision']:.4f}")
+        logger.info(f"  Recall: {metric['recall']:.4f}")
+        logger.info(f"  F1 Score: {metric['f1']:.4f}")
         logger.info(f"  AUC: {metric['auc']:.4f}")
 
     return {
@@ -551,22 +554,22 @@ def evaluate_model(model, test_loader, device, disease_labels):
 
 
 def main():
-    parser = argparse.ArgumentParser(description='胸部X光疾病分类项目')
+    parser = argparse.ArgumentParser(description='Chest X-ray Disease Classification Project')
     parser.add_argument('--mode', type=str, choices=['ssl', 'finetune', 'all', 'evaluate'],
-                        default='all', help='运行模式')
+                        default='all', help='Run mode')
     parser.add_argument('--device', type=str, default=None,
-                        help='运行设备 (auto, mps, cuda, 或 cpu)')
-    parser.add_argument('--batch-size', type=int, default=32, help='批次大小')
-    parser.add_argument('--ssl-epochs', type=int, default=50, help='SSL训练轮数')
-    parser.add_argument('--finetune-epochs', type=int, default=30, help='微调轮数')
+                        help='Running device (auto, mps, cuda, or cpu)')
+    parser.add_argument('--batch-size', type=int, default=32, help='Batch size')
+    parser.add_argument('--ssl-epochs', type=int, default=50, help='SSL training epochs')
+    parser.add_argument('--finetune-epochs', type=int, default=30, help='Fine-tuning epochs')
     parser.add_argument('--checkpoint-dir', type=str, default='./checkpoints',
-                        help='保存检查点的目录')
+                        help='Directory to save checkpoints')
     parser.add_argument('--num-workers', type=int, default=4,
-                        help='数据加载的工作进程数')
+                        help='Number of worker processes for data loading')
     parser.add_argument('--resume', action='store_true',
-                        help='从上次中断的地方恢复训练')
+                        help='Resume training from last interruption')
     parser.add_argument('--save-freq', type=int, default=5,
-                        help='保存检查点的频率（epochs）')
+                        help='Checkpoint saving frequency (epochs)')
     args = parser.parse_args()
 
     if args.device is None or args.device == 'auto':
@@ -578,20 +581,20 @@ def main():
                 try:
                     test_tensor = torch.zeros(1, device=device)
                 except RuntimeError:
-                    logger.warning("指定了 MPS 但不可用，将使用 CPU。")
+                    logger.warning("MPS specified but not available, will use CPU.")
                     device = torch.device("cpu")
         except:
-            logger.warning(f"无效的设备 '{args.device}'，将自动检测设备。")
+            logger.warning(f"Invalid device '{args.device}', will auto-detect device.")
             device = get_available_device()
 
-    logger.info(f"使用设备: {device}")
+    logger.info(f"Using device: {device}")
 
     set_seed(42)
 
     if str(device) == 'mps':
-        logger.info("正在为Apple Silicon (M1/M2)优化参数")
+        logger.info("Optimizing parameters for Apple Silicon (M1/M2)")
         num_workers = min(os.cpu_count() - 1, args.num_workers)
-        logger.info(f"使用 {num_workers} 个数据加载器工作进程")
+        logger.info(f"Using {num_workers} data loader worker processes")
     else:
         num_workers = args.num_workers
 
@@ -600,7 +603,7 @@ def main():
         'finetune_epochs': args.finetune_epochs,
         'batch_size': args.batch_size,
         'checkpoint_dir': args.checkpoint_dir,
-        'backbone': 'resnet18',
+        'backbone': 'resnet50',
         'projection_dim': 128,
         'temperature': 0.1
     }
@@ -621,8 +624,8 @@ def main():
 
     config['num_classes'] = len(disease_labels)
 
-    logger.info(f"疾病标签: {disease_labels}")
-    logger.info(f"类别数量: {config['num_classes']}")
+    logger.info(f"Disease labels: {disease_labels}")
+    logger.info(f"Number of classes: {config['num_classes']}")
 
     if args.mode in ['ssl', 'all']:
         ssl_model = SimCLREncoder(
@@ -646,7 +649,7 @@ def main():
 
     if args.mode in ['finetune', 'all']:
         if args.mode == 'all' and 'ssl_model' in locals():
-            logger.info("使用刚训练好的SSL模型进行微调")
+            logger.info("Using the just-trained SSL model for fine-tuning")
         else:
             ssl_model = None
             last_model_path = Path(config['checkpoint_dir']) / 'last_ssl_model.pt'
@@ -667,9 +670,9 @@ def main():
                 ).to(device)
                 checkpoint = torch.load(checkpoint_path, map_location=device)
                 ssl_model.load_state_dict(checkpoint['model_state_dict'])
-                logger.info(f"从 {checkpoint_path} 加载了SSL模型")
+                logger.info(f"Loaded SSL model from {checkpoint_path}")
             else:
-                logger.warning(f"未找到SSL模型检查点，将使用预训练的ResNet")
+                logger.warning(f"No SSL model checkpoint found, will use pretrained ResNet")
 
         classifier = ChestXrayClassifier(
             ssl_model=ssl_model,
@@ -707,9 +710,9 @@ def main():
                     ).to(device)
                     checkpoint = torch.load(best_model_path, map_location=device)
                     classifier.load_state_dict(checkpoint['model_state_dict'])
-                    logger.info(f"从 {best_model_path} 加载了分类器")
+                    logger.info(f"Loaded classifier from {best_model_path}")
                 else:
-                    logger.error(f"在 {best_model_path} 未找到分类器检查点")
+                    logger.error(f"No classifier checkpoint found at {best_model_path}")
                     return
 
             metrics = evaluate_model(
@@ -719,23 +722,23 @@ def main():
                 disease_labels=disease_labels
             )
 
-            logger.info("训练和评估完成！")
+            logger.info("Training and evaluation completed!")
 
             metrics_path = Path(config['checkpoint_dir']) / 'test_metrics.txt'
             with open(metrics_path, 'w') as f:
-                f.write("测试集评估指标:\n\n")
-                f.write(f"整体准确率: {metrics['overall']['accuracy']:.4f}\n")
-                f.write(f"整体精确率: {metrics['overall']['precision']:.4f}\n")
-                f.write(f"整体召回率: {metrics['overall']['recall']:.4f}\n")
-                f.write(f"整体F1分数: {metrics['overall']['f1']:.4f}\n")
-                f.write(f"平均AUC: {metrics['overall']['avg_auc']:.4f}\n\n")
+                f.write("Test Set Evaluation Metrics:\n\n")
+                f.write(f"Overall Accuracy: {metrics['overall']['accuracy']:.4f}\n")
+                f.write(f"Overall Precision: {metrics['overall']['precision']:.4f}\n")
+                f.write(f"Overall Recall: {metrics['overall']['recall']:.4f}\n")
+                f.write(f"Overall F1 Score: {metrics['overall']['f1']:.4f}\n")
+                f.write(f"Average AUC: {metrics['overall']['avg_auc']:.4f}\n\n")
 
-                f.write("每个疾病的指标:\n")
+                f.write("Metrics for each disease:\n")
                 for disease, metric in metrics['per_disease'].items():
                     f.write(f"{disease}:\n")
-                    f.write(f"  精确率: {metric['precision']:.4f}\n")
-                    f.write(f"  召回率: {metric['recall']:.4f}\n")
-                    f.write(f"  F1分数: {metric['f1']:.4f}\n")
+                    f.write(f"  Precision: {metric['precision']:.4f}\n")
+                    f.write(f"  Recall: {metric['recall']:.4f}\n")
+                    f.write(f"  F1 Score: {metric['f1']:.4f}\n")
                     f.write(f"  AUC: {metric['auc']:.4f}\n\n")
 
 

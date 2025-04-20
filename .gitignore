@@ -4,6 +4,7 @@ datasets/chestxray14/
 
 # 模型检查点（可能很大）
 checkpoints/
+checkpoints2/
 *.pt
 
 # 生成的图像

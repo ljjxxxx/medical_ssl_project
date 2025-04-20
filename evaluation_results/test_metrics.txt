@@ -1,0 +1,93 @@
+Test Set Evaluation Metrics:
+
+Overall Accuracy: 0.9494
+Overall Precision: 0.5492
+Overall Recall: 0.1111
+Overall F1 Score: 0.1848
+Average AUC: 0.8217
+
+Metrics for each disease:
+Atelectasis:
+  Precision: 0.5034
+  Recall: 0.0842
+  F1 Score: 0.1443
+  AUC: 0.7956
+
+Consolidation:
+  Precision: 0.0000
+  Recall: 0.0000
+  F1 Score: 0.0000
+  AUC: 0.8072
+
+Infiltration:
+  Precision: 0.4417
+  Recall: 0.0596
+  F1 Score: 0.1051
+  AUC: 0.7029
+
+Pneumothorax:
+  Precision: 0.5249
+  Recall: 0.1463
+  F1 Score: 0.2288
+  AUC: 0.8617
+
+Edema:
+  Precision: 0.0000
+  Recall: 0.0000
+  F1 Score: 0.0000
+  AUC: 0.8936
+
+Emphysema:
+  Precision: 0.5556
+  Recall: 0.1047
+  F1 Score: 0.1762
+  AUC: 0.8752
+
+Fibrosis:
+  Precision: 0.0000
+  Recall: 0.0000
+  F1 Score: 0.0000
+  AUC: 0.7673
+
+Effusion:
+  Precision: 0.5888
+  Recall: 0.3947
+  F1 Score: 0.4726
+  AUC: 0.8800
+
+Pneumonia:
+  Precision: 0.0000
+  Recall: 0.0000
+  F1 Score: 0.0000
+  AUC: 0.7527
+
+Pleural_Thickening:
+  Precision: 0.0000
+  Recall: 0.0000
+  F1 Score: 0.0000
+  AUC: 0.7720
+
+Cardiomegaly:
+  Precision: 0.4426
+  Recall: 0.0738
+  F1 Score: 0.1265
+  AUC: 0.8962
+
+Nodule:
+  Precision: 0.5833
+  Recall: 0.0077
+  F1 Score: 0.0151
+  AUC: 0.7254
+
+Mass:
+  Precision: 0.7048
+  Recall: 0.0818
+  F1 Score: 0.1465
+  AUC: 0.8442
+
+Hernia:
+  Precision: 1.0000
+  Recall: 0.0357
+  F1 Score: 0.0690
+  AUC: 0.9291
+
