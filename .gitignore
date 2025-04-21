@@ -9,7 +9,7 @@ checkpoints2/
 
 # 生成的图像
 examples/
-*.png
+#*.png
 
 # Python缓存文件
 __pycache__/
