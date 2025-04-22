@@ -13,9 +13,9 @@
 ## 项目结构
 
 ```
-chest-xray-classification/
+medical_ssl_project/
 │
-├── datasets/                  # 数据集目录（自动下载的数据存放处）
+├── datasets/                  # 数据集目录
 │
 ├── src/                       # 源代码目录
 │   ├── models/                # 模型相关代码
