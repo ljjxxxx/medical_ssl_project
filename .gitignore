@@ -8,7 +8,6 @@ checkpoints2/
 *.pt
 
 # 生成的图像
-examples/
 #*.png
 
 # Python缓存文件
@@ -37,3 +36,5 @@ temp_upload.png
 # JetBrains IDE配置文件
 .idea/
 .idea*
+
+chest_xray_classification.egg-info/

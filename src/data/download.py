@@ -2,16 +2,15 @@ import os
 import pandas as pd
 import numpy as np
 import torch
-from torch.utils.data import Dataset, DataLoader
-import torchvision.transforms as transforms
-from PIL import Image
+from torch.utils.data import DataLoader
 import logging
-from pathlib import Path
 import urllib.request
 import tarfile
-import zipfile
-import shutil
+from pathlib import Path
 from tqdm import tqdm
+
+from .dataset import ChestXrayDataset, SSLChestXrayDataset
+from .transforms import get_ssl_transforms, get_eval_transforms
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -27,6 +26,17 @@ class UrlProgress(tqdm):
 
 
 def download_chestxray14_dataset(output_dir="./datasets/chestxray14", use_subset=False, subset_size=5000):
+    """
+    下载并处理ChestX-ray14数据集
+
+    Args:
+        output_dir: 输出目录
+        use_subset: 是否使用子集
+        subset_size: 子集大小
+
+    Returns:
+        output_path: 数据集路径
+    """
     output_path = Path(output_dir)
     output_path.mkdir(parents=True, exist_ok=True)
 
@@ -53,6 +63,7 @@ def download_chestxray14_dataset(output_dir="./datasets/chestxray14", use_subset
 
     data_entry_path = output_path / "Data_Entry_2017.csv"
 
+    # # 下载数据标签
     # logger.info(f"正在从 {data_entry_url} 下载数据标签CSV")
     # with UrlProgress(unit='B', unit_scale=True, miniters=1, desc="下载数据标签") as progress:
     #     urllib.request.urlretrieve(data_entry_url, data_entry_path, reporthook=progress.update_to)
@@ -132,136 +143,18 @@ def download_chestxray14_dataset(output_dir="./datasets/chestxray14", use_subset
     return output_path
 
 
-class ChestXrayDataset(Dataset):
-
-    def __init__(
-            self,
-            data_dir,
-            csv_file,
-            transform=None,
-            split='train'
-    ):
-        self.data_dir = Path(data_dir)
-        self.df = pd.read_csv(csv_file)
-
-        disease_labels_path = self.data_dir / "disease_labels.txt"
-        if disease_labels_path.exists():
-            with open(disease_labels_path, "r") as f:
-                self.disease_labels = f.read().strip().split("\n")
-        else:
-            self.disease_labels = ['Atelectasis', 'Consolidation', 'Infiltration', 'Pneumothorax',
-                                   'Edema', 'Emphysema', 'Fibrosis', 'Effusion', 'Pneumonia',
-                                   'Pleural_Thickening', 'Cardiomegaly', 'Nodule', 'Mass', 'Hernia']
-
-        if split:
-            self.df = self.df[self.df['split'] == split].reset_index(drop=True)
-
-        self.transform = transform
-        logger.info(f"加载了 {split} 数据集，共 {len(self.df)} 个样本")
-
-    def __len__(self):
-        return len(self.df)
-
-    def __getitem__(self, idx):
-        img_name = self.df.iloc[idx]['Image Index']
-        img_path = self.data_dir / "images" / img_name
-
-        try:
-            with Image.open(img_path) as img:
-                image = img.convert('RGB')
-
-                label = []
-                for disease in self.disease_labels:
-                    label.append(float(self.df.iloc[idx][disease]))
-                label = torch.tensor(label, dtype=torch.float32)
-
-                if self.transform:
-                    image = self.transform(image)
-
-                return {'image': image, 'label': label, 'filename': img_name}
-
-        except Exception as e:
-            logger.error(f"加载图像 {img_path} 时出错: {e}")
-            image = torch.zeros((3, 224, 224), dtype=torch.float32)
-            label = torch.zeros(len(self.disease_labels), dtype=torch.float32)
-            return {'image': image, 'label': label, 'filename': img_name}
-
-
-class SSLChestXrayDataset(Dataset):
-    def __init__(
-            self,
-            data_dir,
-            csv_file,
-            transform=None,
-            split='train'
-    ):
-        self.data_dir = Path(data_dir)
-        self.df = pd.read_csv(csv_file)
-
-        if split:
-            self.df = self.df[self.df['split'] == split].reset_index(drop=True)
-
-        self.transform = transform
-        logger.info(f"加载了SSL {split} 数据集，共 {len(self.df)} 个样本")
-
-    def __len__(self):
-        return len(self.df)
-
-    def __getitem__(self, idx):
-        img_name = self.df.iloc[idx]['Image Index']
-        img_path = self.data_dir / "images" / img_name
-
-        try:
-            with Image.open(img_path) as img:
-                image = img.convert('RGB')
-
-                if self.transform:
-                    view1 = self.transform(image)
-                    view2 = self.transform(image)
-                else:
-                    default_transform = transforms.ToTensor()
-                    view1 = default_transform(image)
-                    view2 = default_transform(image)
-
-                return {'views': [view1, view2], 'filename': img_name}
-
-        except Exception as e:
-            logger.error(f"加载图像 {img_path} 时出错: {e}")
-            view = torch.zeros((3, 224, 224), dtype=torch.float32)
-            return {'views': [view, view], 'filename': img_name}
-
-
-def get_ssl_transforms():
-
-    ssl_transform = transforms.Compose([
-        transforms.RandomResizedCrop(224, scale=(0.2, 1.0)),
-        transforms.RandomHorizontalFlip(),
-        transforms.RandomApply([
-            transforms.ColorJitter(0.4, 0.4, 0.4, 0.1)
-        ], p=0.8),
-        transforms.RandomGrayscale(p=0.2),
-        transforms.GaussianBlur(kernel_size=23, sigma=(0.1, 2.0)),
-        transforms.ToTensor(),
-        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
-    ])
-
-    return ssl_transform
-
-
-def get_eval_transforms():
-
-    eval_transform = transforms.Compose([
-        transforms.Resize(256),
-        transforms.CenterCrop(224),
-        transforms.ToTensor(),
-        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
-    ])
-
-    return eval_transform
-
-
 def create_dataloaders(data_dir, batch_size=32, num_workers=4):
+    """
+    创建数据加载器
 
+    Args:
+        data_dir: 数据目录
+        batch_size: 批处理大小
+        num_workers: 工作进程数
+
+    Returns:
+        dataloaders: 数据加载器字典
+    """
     csv_file = os.path.join(data_dir, "processed_dataset.csv")
 
     disease_labels_path = Path(data_dir) / "disease_labels.txt"
