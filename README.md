@@ -1,177 +1,184 @@
-# 胸部X光疾病分类项目
+English | [简体中文](readme/README_cn.md)
+# 🫁 Chest X-Ray Disease Classification Project 🔬
 
-这个项目使用深度学习技术自动分析胸部X光片，可以检测14种常见的胸部疾病。该项目包含完整的训练、评估和应用部署流程，采用了自监督学习(SSL)和监督学习相结合的方法来提高模型性能。
+This project uses deep learning technology to automatically analyze chest X-rays and detect 14 common chest diseases. The project includes complete training, evaluation, and deployment processes, using a combination of self-supervised learning (SSL) and supervised learning methods to improve model performance. Let AI become a doctor's helpful assistant! ✨
 
-## 主要特点
+## ✨ Key Features
 
-- **自监督预训练**: 使用SimCLR对比学习方法对模型进行预训练
-- **多标签分类**: 同时检测多种胸部疾病
-- **交互式界面**: 基于Gradio的用户友好Web应用程序
-- **详细评估**: 提供精确度、召回率、F1分数和AUC等多种性能指标
-- **可视化支持**: 训练过程和评估结果的图表可视化
+- 🧠 **Self-Supervised Pre-training**: Uses SimCLR contrastive learning method to pre-train the model, allowing the machine to learn to "see" X-rays on its own
+- 🏷️ **Multi-Label Classification**: Simultaneously detects multiple chest diseases for comprehensive diagnosis in one scan
+- 🖥️ **Interactive Interface**: User-friendly web application based on Gradio, AI diagnosis with just a few clicks
+- 📊 **Detailed Evaluation**: Provides multiple performance metrics including precision, recall, F1 score, and AUC for clear results
+- 📈 **Visualization Support**: Chart visualization of training process and evaluation results, making data more engaging
+- 🍎 **Optimized for Mac**: Mac's MPS GPU finally gets to shine
 
-## 项目结构
+## 📂 Project Structure
 
 ```
 medical_ssl_project/
 │
-├── datasets/                  # 数据集目录
+├── datasets/                  # Dataset directory
 │
-├── src/                       # 源代码目录
-│   ├── models/                # 模型相关代码
+├── src/                       # Source code directory
+│   ├── models/                # Model-related code
 │   │   ├── __init__.py
-│   │   ├── backbones.py       # 主干网络
-│   │   ├── ssl_model.py       # 自监督学习模型
-│   │   └── classifier.py      # 疾病分类器
+│   │   ├── backbones.py       # Backbone networks
+│   │   ├── ssl_model.py       # Self-supervised learning model
+│   │   └── classifier.py      # Disease classifier
 │   │
-│   ├── data/                  # 数据处理相关代码
+│   ├── data/                  # Data processing related code
 │   │   ├── __init__.py
-│   │   ├── dataset.py         # 数据集类
-│   │   ├── transforms.py      # 数据转换和增强
-│   │   └── download.py        # 数据下载函数
+│   │   ├── dataset.py         # Dataset classes
+│   │   ├── transforms.py      # Data transformations and augmentation
+│   │   └── download.py        # Data download functions
 │   │
-│   ├── utils/                 # 通用工具函数
+│   ├── utils/                 # Utility functions
 │   │   ├── __init__.py
-│   │   ├── device.py          # 设备选择工具
-│   │   ├── visualization.py   # 图表生成和可视化
-│   │   └── metrics.py         # 评估指标
+│   │   ├── device.py          # Device selection utilities
+│   │   ├── visualization.py   # Chart generation and visualization
+│   │   └── metrics.py         # Evaluation metrics
 │   │
-│   ├── training/              # 训练相关代码
+│   ├── training/              # Training related code
 │   │   ├── __init__.py
-│   │   ├── ssl_trainer.py     # SSL训练器
-│   │   └── classifier_trainer.py  # 分类器训练器
+│   │   ├── ssl_trainer.py     # SSL trainer
+│   │   └── classifier_trainer.py  # Classifier trainer
 │   │
-│   └── app/                   # Web应用相关代码
+│   └── app/                   # Web application related code
 │       ├── __init__.py
-│       ├── interface.py       # Gradio界面
-│       └── disease_info.py    # 疾病信息和翻译
+│       ├── interface.py       # Gradio interface
+│       └── disease_info.py    # Disease information and translations
 │
-├── scripts/                   # 脚本目录
-│   ├── train_ssl.py           # SSL训练脚本
-│   ├── train_classifier.py    # 分类器训练脚本
-│   ├── evaluate.py            # 评估脚本
-│   └── regenerate_plots.py    # 重新生成图表脚本
+├── scripts/                   # Scripts directory
+│   ├── train_ssl.py           # SSL training script
+│   ├── train_classifier.py    # Classifier training script
+│   ├── evaluate.py            # Evaluation script
+│   └── regenerate_plots.py    # Plot regeneration script
 │
-├── examples/                  # 示例X光图像目录
+├── examples/                  # Example X-ray images directory
 │
-├── checkpoints/               # 模型检查点目录
+├── checkpoints/               # Model checkpoints directory
 │
-├── app.py                     # 应用入口
-├── requirements.txt           # 项目依赖
-├── setup.py                   # 安装脚本
-└── README.md                  # 项目说明文档
+├── app.py                     # Application entry point
+├── requirements.txt           # Project dependencies
+├── setup.py                   # Installation script
+└── README.md                  # Project documentation
 ```
 
-## 数据集
+## 📊 Dataset
 
-该项目使用NIH ChestX-ray14数据集，包含超过100,000张有标注的胸部X光片，涵盖14种常见病理。
+This project uses the NIH ChestX-ray14 dataset, which contains over 100,000 annotated chest X-rays covering 14 common pathologies. Such a large dataset is perfect for machine learning! 🤓 Fans whirring! 💨
 
-下载地址：https://www.kaggle.com/datasets/nih-chest-xrays/data
+Download link: https://www.kaggle.com/datasets/nih-chest-xrays/data
 
-## 使用方法
+## 🚀 Usage
 
-### 训练模型
+### 🏋️‍♀️ Training Models
 
-#### 1. 自监督学习预训练:
+#### 1. Self-Supervised Learning Pre-training (Let the model learn features on its own):
 
 ```bash
 python scripts/train_ssl.py --epochs 50 --batch-size 32
 ```
 
-可用参数:
+Available parameters (Parameter tuning masters, show us your skills):
 
-- `--device`: 训练设备 (auto, cuda, mps, 或 cpu)
-- `--batch-size`: 批量大小 (默认: 32)
-- `--epochs`: 训练轮数 (默认: 50)
-- `--checkpoint-dir`: 检查点保存目录 (默认: ./checkpoints)
-- `--num-workers`: 数据加载的工作进程数 (默认: 4)
-- `--resume`: 从上次中断处继续训练
-- `--lr`: 学习率 (默认: 0.0003)
+- `--device`: Training device (auto, cuda, mps, or cpu)
+- `--batch-size`: Batch size (default: 32)
+- `--epochs`: Number of training epochs (default: 50)
+- `--checkpoint-dir`: Checkpoint save directory (default: ./checkpoints)
+- `--num-workers`: Number of data loading workers (default: 4)
+- `--resume`: Resume training from last checkpoint (Interrupted? No worries, continue!)
+- `--lr`: Learning rate (default: 0.0003)
 
-#### 2. 分类器训练:
+#### 2. Classifier Training (Teaching the model to recognize diseases):
 
 ```bash
 python scripts/train_classifier.py --epochs 30 --ssl-model ./checkpoints/best_ssl_model.pt
 ```
 
-可用参数:
+Available parameters:
 
-- `--device`: 训练设备 (auto, cuda, mps, 或 cpu)
-- `--batch-size`: 批量大小 (默认: 32)
-- `--epochs`: 训练轮数 (默认: 30)
-- `--checkpoint-dir`: 检查点保存目录 (默认: ./checkpoints)
-- `--ssl-model`: 预训练SSL模型路径 (如果不提供，将使用预训练的ResNet)
-- `--num-workers`: 数据加载的工作进程数 (默认: 4)
-- `--resume`: 从上次中断处继续训练
-- `--lr`: 学习率 (默认: 0.0001)
-- `--freeze-backbone`: 是否冻结骨干网络
+- `--device`: Training device (auto, cuda, mps, or cpu)
+- `--batch-size`: Batch size (default: 32)
+- `--epochs`: Number of training epochs (default: 30)
+- `--checkpoint-dir`: Checkpoint save directory (default: ./checkpoints)
+- `--ssl-model`: Pre-trained SSL model path (if not provided, will use pre-trained ResNet)
+- `--num-workers`: Number of data loading workers (default: 4)
+- `--resume`: Resume training from last checkpoint
+- `--lr`: Learning rate (default: 0.0001)
+- `--freeze-backbone`: Whether to freeze backbone network (Freeze parameters, save effort)
 
-### 评估模型
+### 🔍 Model Evaluation
 
-评估模型性能:
+Evaluate model performance:
 
 ```bash
 python scripts/evaluate.py --checkpoint-path ./checkpoints/best_classifier_model.pt
 ```
 
-可用参数:
+Available parameters:
 
-- `--checkpoint-path`: 模型检查点文件路径 (默认: ./checkpoints/best_classifier_model.pt)
-- `--data-dir`: 数据集目录路径 (默认: ./datasets/chestxray14)
-- `--batch-size`: 评估批量大小 (默认: 32)
-- `--output-dir`: 保存评估结果的目录 (默认: ./evaluation_results)
-- `--device`: 评估设备 (cuda, mps, 或 cpu)
-- `--num-workers`: 数据加载的工作进程数 (默认: 4)
-- `--strict-loading`: 使用严格的state_dict加载 (设为False以跳过不匹配的键)
+- `--checkpoint-path`: Model checkpoint file path (default: ./checkpoints/best_classifier_model.pt)
+- `--data-dir`: Dataset directory path (default: ./datasets/chestxray14)
+- `--batch-size`: Evaluation batch size (default: 32)
+- `--output-dir`: Directory to save evaluation results (default: ./evaluation_results)
+- `--device`: Evaluation device (cuda, mps, or cpu)
+- `--num-workers`: Number of data loading workers (default: 4)
+- `--strict-loading`: Use strict state_dict loading (set to False to skip mismatched keys)
 
-### 重新生成训练图表
+### 📈 Regenerate Training Plots
 
-重新生成训练过程图表:
+Regenerate training process plots:
 
 ```bash
 python scripts/regenerate_plots.py
 ```
 
-可用参数:
+Available parameters:
 
-- `--checkpoint-dir`: 包含训练状态JSON文件的目录 (默认: ./checkpoints)
-- `--output-dir`: 保存重新生成的图表的目录 (默认: 与checkpoint-dir相同)
-- `--ssl-only`: 仅重新生成SSL训练曲线
-- `--classifier-only`: 仅重新生成分类器训练曲线
+- `--checkpoint-dir`: Directory containing training state JSON files (default: ./checkpoints)
+- `--output-dir`: Directory to save regenerated plots (default: same as checkpoint-dir)
+- `--ssl-only`: Only regenerate SSL training curves
+- `--classifier-only`: Only regenerate classifier training curves
 
-### 启动Web应用
+### 🌐 Launch Web Application
 
-启动交互式Web界面:
+Launch the interactive web interface:
 
 ```bash
 python app.py
 ```
 
-可用参数:
+Available parameters:
 
-- `--model`: 训练好的模型检查点路径 (默认: ./checkpoints/best_classifier_model.pt)
-- `--device`: 运行设备 (auto, mps, cuda, 或 cpu)
-- `--port`: Gradio服务器端口 (默认: 7860)
+- `--model`: Trained model checkpoint path (default: ./checkpoints/best_classifier_model.pt)
+- `--device`: Running device (auto, mps, cuda, or cpu)
+- `--port`: Gradio server port (default: 7860)
 
-应用将在`http://localhost:7860`上可访问。
+The application will be accessible at `http://localhost:7860`. Just open your browser and you're ready to go! 🎉
 
-## 性能指标
+## 📊 Performance Metrics
 
-模型在测试集上的性能:
+Model performance on the test set:
 
-- **整体准确率**: 0.9494
-- **整体精确率**: 0.5492
-- **整体召回率**: 0.1111
-- **整体F1分数**: 0.1848
-- **平均AUC**: 0.8217
+- **Overall Accuracy**: 0.9494 🎯
+- **Overall Precision**: 0.5492 🔍
+- **Overall Recall**: 0.1111 🕵️
+- **Overall F1 Score**: 0.1848 ⚖️
+- **Average AUC**: 0.8217 📈
 
-各疾病AUC和F1分数可以在`evaluation_results/test_metrics.txt`中查看，或通过以下命令重新生成:
+AUC and F1 scores for each disease can be found in `evaluation_results/test_metrics.txt`, or regenerated using:
 
 ```bash
 python scripts/evaluate.py
 ```
 
-## 致谢
+## 🐍 Python Version
 
-- 感谢NIH提供ChestX-ray14数据集
-- 本项目的对比学习部分参考了SimCLR论文
+This project uses Python version 3.8 (Not the latest but very stable!)
+
+## 🙏 Acknowledgments
+
+- 👩‍⚕️ Thanks to NIH for providing the ChestX-ray14 dataset
+- 🧠 The contrastive learning part of this project is based on the SimCLR paper
+- 🤖 This project used AI to enhance development efficiency (AI helping AI, double the efficiency!)
