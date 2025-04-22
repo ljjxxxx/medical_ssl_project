@@ -1,4 +1,4 @@
-English | [简体中文](readme/README_cn.md)
+English | [简体中文](README_cn.md)
 # 🫁 Chest X-Ray Disease Classification Project 🔬
 
 This project uses deep learning technology to automatically analyze chest X-rays and detect 14 common chest diseases. The project includes complete training, evaluation, and deployment processes, using a combination of self-supervised learning (SSL) and supervised learning methods to improve model performance. Let AI become a doctor's helpful assistant! ✨
