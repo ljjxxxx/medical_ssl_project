@@ -160,13 +160,25 @@ python app.py
 
 模型在测试集上的性能:
 
-- **整体准确率**: 0.9494 🎯
-- **整体精确率**: 0.5492 🔍
-- **整体召回率**: 0.1111 🕵️
-- **整体F1分数**: 0.1848 ⚖️
-- **平均AUC**: 0.8217 📈
+- **整体准确率**: 0.8926 🎯
+- **整体精确率**: 0.2298 🔍
+- **整体召回率**: 0.4594 🕵️
+- **整体F1分数**: 0.3063 ⚖️
+- **平均AUC**: 0.8169 📈
 
-各疾病AUC和F1分数可以在`evaluation_results/test_metrics.txt`中查看，或通过以下命令重新生成:
+疾病检测表现最优的前三名:
+
+- **胸腔积液(Effusion)**: F1分数 0.5171, AUC 0.8752
+- **浸润(Infiltration)**: F1分数 0.3942, AUC 0.6992
+- **肿块(Mass)**: F1分数 0.3801, AUC 0.8387
+
+我们针对不同疾病采用了个性化阈值策略，以优化医学筛查性能:
+
+- 危急疾病如气胸(Pneumothorax)采用较低阈值(0.12)，实现67.5%的高召回率
+- 常见疾病如胸腔积液(Effusion)保持适中阈值(0.30)，平衡精确率与召回率
+- 罕见疾病如疝气(Hernia)使用极低阈值(0.05)，利用其高AUC(0.9073)提高检出率
+
+该模型特别适合作为医学筛查工具使用，优先确保不漏诊重要疾病。各疾病详细性能指标可在`evaluation_results/test_metrics.txt`中查看，或通过以下命令重新评估:
 
 ```bash
 python scripts/evaluate.py
@@ -177,6 +189,7 @@ python scripts/evaluate.py
 本项目使用的python版本为3.8 (不是最新但很稳定！)
 
 ## 💻 页面效果
+
 ![img.png](assets%2Fimg.png)
 ![img_1.png](assets%2Fimg_1.png)
 ![img_2.png](assets%2Fimg_2.png)
@@ -357,13 +370,25 @@ The application will be accessible at `http://localhost:7860`. Just open your br
 
 Model performance on the test set:
 
-- **Overall Accuracy**: 0.9494 🎯
-- **Overall Precision**: 0.5492 🔍
-- **Overall Recall**: 0.1111 🕵️
-- **Overall F1 Score**: 0.1848 ⚖️
-- **Average AUC**: 0.8217 📈
+- **Overall Accuracy**: 0.8926 🎯
+- **Overall Precision**: 0.2298 🔍
+- **Overall Recall**: 0.4594 🕵️
+- **Overall F1 Score**: 0.3063 ⚖️
+- **Average AUC**: 0.8169 📈
 
-AUC and F1 scores for each disease can be found in `evaluation_results/test_metrics.txt`, or regenerated using:
+Top-performing diseases:
+
+- **Effusion**: F1 score 0.5171, AUC 0.8752
+- **Infiltration**: F1 score 0.3942, AUC 0.6992
+- **Mass**: F1 score 0.3801, AUC 0.8387
+
+We adopted personalized threshold strategies for different diseases to optimize medical screening performance:
+
+- Critical diseases like Pneumothorax use a lower threshold (0.12), achieving a high recall of 67.5%
+- Common diseases like Effusion maintain a moderate threshold (0.30), balancing precision and recall
+- Rare diseases like Hernia use an extremely low threshold (0.05), leveraging its high AUC (0.9073) to improve detection
+
+This model is particularly suitable as a medical screening tool, prioritizing the detection of important diseases. Detailed performance metrics for each disease can be found in `evaluation_results/test_metrics.txt`, or re-evaluated using:
 
 ```bash
 python scripts/evaluate.py
