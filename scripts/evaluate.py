@@ -39,6 +39,24 @@ def evaluate_model(model, test_loader, device, disease_labels, output_dir="./eva
     output_path = Path(output_dir)
     output_path.mkdir(parents=True, exist_ok=True)
 
+    # 定义每种疾病的自定义阈值
+    disease_thresholds = {
+        'Consolidation': 0.12,  # 肺实变，临床重要性高
+        'Edema': 0.12,  # 肺水肿，可能危及生命
+        'Fibrosis': 0.04,  # 肺纤维化，慢性严重疾病
+        'Pneumonia': 0.02,  # 肺炎，高度临床相关
+        'Pleural_Thickening': 0.07,  # 胸膜增厚，需要关注
+        'Nodule': 0.13,  # 肺结节，癌症风险，不能漏诊
+        'Cardiomegaly': 0.15,  # 心脏肥大，心脏疾病指标
+        'Atelectasis': 0.25,  # 肺不张
+        'Infiltration': 0.25,  # 肺浸润
+        'Hernia': 0.05,  # 疝气
+        'Mass': 0.20,  # 肿块，可能恶性
+        'Pneumothorax': 0.12,  # 气胸，医疗紧急情况
+        'Emphysema': 0.15,  # 肺气肿，性能相对较好
+        'Effusion': 0.30,  # 胸腔积液，当前最佳性能疾病
+    }
+
     model.eval()
     all_logits = []
     all_probs = []
@@ -53,9 +71,14 @@ def evaluate_model(model, test_loader, device, disease_labels, output_dir="./eva
             outputs = model(images)
             logits = outputs['logits']
 
-            # 计算概率和预测
+            # 计算概率
             probs = torch.sigmoid(logits)
-            preds = (probs >= 0.5).float()
+
+            # 使用自定义阈值进行预测
+            preds = torch.zeros_like(probs)
+            for i, disease in enumerate(disease_labels):
+                threshold = disease_thresholds.get(disease, 0.3)  # 默认使用0.3作为阈值
+                preds[:, i] = (probs[:, i] >= threshold).float()
 
             all_logits.append(logits.cpu().numpy())
             all_probs.append(probs.cpu().numpy())
@@ -96,6 +119,13 @@ def evaluate_model(model, test_loader, device, disease_labels, output_dir="./eva
         f.write(f"整体F1分数: {metrics['f1']:.4f}\n")
         f.write(f"平均AUC: {metrics['avg_auc']:.4f}\n\n")
 
+        # 记录使用的疾病阈值
+        f.write("使用的疾病阈值:\n")
+        for disease in disease_labels:
+            threshold = disease_thresholds.get(disease, 0.3)
+            f.write(f"{disease}: {threshold:.2f}\n")
+        f.write("\n")
+
         f.write("每种疾病的指标:\n")
         for disease, metric in disease_metrics.items():
             f.write(f"{disease}:\n")
@@ -130,6 +160,16 @@ def evaluate_model(model, test_loader, device, disease_labels, output_dir="./eva
         plt.title('按疾病的AUC')
         plt.tight_layout()
         plt.savefig(output_path / 'disease_auc_scores.png')
+    plt.close()
+
+    # 创建召回率柱状图
+    plt.figure(figsize=(8, 6))
+    plt.bar(disease_labels, [disease_metrics[d]['recall'] for d in disease_labels])
+    plt.xticks(rotation=90)
+    plt.ylabel('召回率')
+    plt.title('按疾病的召回率')
+    plt.tight_layout()
+    plt.savefig(output_path / 'disease_recall_scores.png')
     plt.close()
 
     logger.info(f"评估结果已保存到 {output_path}")

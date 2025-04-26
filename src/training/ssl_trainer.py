@@ -47,6 +47,7 @@ def train_ssl_model(model, train_loader, val_loader, optimizer, device, config, 
     best_val_loss = float('inf')
     start_epoch = 0
 
+    # 断点续训
     if resume and last_model_path.exists() and train_state_path.exists():
         logger.info(f"Resuming training from {last_model_path}")
 

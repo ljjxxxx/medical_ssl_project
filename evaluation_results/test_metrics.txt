@@ -1,93 +1,109 @@
-Test Set Evaluation Metrics:
+测试集评估指标:
 
-Overall Accuracy: 0.9494
-Overall Precision: 0.5492
-Overall Recall: 0.1111
-Overall F1 Score: 0.1848
-Average AUC: 0.8217
+整体准确率: 0.8926
+整体精确率: 0.2298
+整体召回率: 0.4594
+整体F1分数: 0.3063
+平均AUC: 0.8169
 
-Metrics for each disease:
+使用的疾病阈值:
+Atelectasis: 0.25
+Consolidation: 0.12
+Infiltration: 0.25
+Pneumothorax: 0.12
+Edema: 0.12
+Emphysema: 0.15
+Fibrosis: 0.04
+Effusion: 0.30
+Pneumonia: 0.02
+Pleural_Thickening: 0.07
+Cardiomegaly: 0.15
+Nodule: 0.13
+Mass: 0.20
+Hernia: 0.05
+
+每种疾病的指标:
 Atelectasis:
-  Precision: 0.5034
-  Recall: 0.0842
-  F1 Score: 0.1443
-  AUC: 0.7956
+  精确率: 0.3206
+  召回率: 0.4098
+  F1分数: 0.3597
+  AUC: 0.7953
 
 Consolidation:
-  Precision: 0.0000
-  Recall: 0.0000
-  F1 Score: 0.0000
-  AUC: 0.8072
+  精确率: 0.1937
+  召回率: 0.3511
+  F1分数: 0.2496
+  AUC: 0.8051
 
 Infiltration:
-  Precision: 0.4417
-  Recall: 0.0596
-  F1 Score: 0.1051
-  AUC: 0.7029
+  精确率: 0.3447
+  召回率: 0.4603
+  F1分数: 0.3942
+  AUC: 0.6992
 
 Pneumothorax:
-  Precision: 0.5249
-  Recall: 0.1463
-  F1 Score: 0.2288
-  AUC: 0.8617
+  精确率: 0.2087
+  召回率: 0.6747
+  F1分数: 0.3187
+  AUC: 0.8548
 
 Edema:
-  Precision: 0.0000
-  Recall: 0.0000
-  F1 Score: 0.0000
-  AUC: 0.8936
+  精确率: 0.1827
+  召回率: 0.3978
+  F1分数: 0.2504
+  AUC: 0.8898
 
 Emphysema:
-  Precision: 0.5556
-  Recall: 0.1047
-  F1 Score: 0.1762
-  AUC: 0.8752
+  精确率: 0.2602
+  召回率: 0.3822
+  F1分数: 0.3097
+  AUC: 0.8672
 
 Fibrosis:
-  Precision: 0.0000
-  Recall: 0.0000
-  F1 Score: 0.0000
-  AUC: 0.7673
+  精确率: 0.0727
+  召回率: 0.2753
+  F1分数: 0.1151
+  AUC: 0.7633
 
 Effusion:
-  Precision: 0.5888
-  Recall: 0.3947
-  F1 Score: 0.4726
-  AUC: 0.8800
+  精确率: 0.4540
+  召回率: 0.6006
+  F1分数: 0.5171
+  AUC: 0.8752
 
 Pneumonia:
-  Precision: 0.0000
-  Recall: 0.0000
-  F1 Score: 0.0000
-  AUC: 0.7527
+  精确率: 0.0341
+  召回率: 0.5689
+  F1分数: 0.0644
+  AUC: 0.7458
 
 Pleural_Thickening:
-  Precision: 0.0000
-  Recall: 0.0000
-  F1 Score: 0.0000
-  AUC: 0.7720
+  精确率: 0.1172
+  召回率: 0.4234
+  F1分数: 0.1836
+  AUC: 0.7762
 
 Cardiomegaly:
-  Precision: 0.4426
-  Recall: 0.0738
-  F1 Score: 0.1265
-  AUC: 0.8962
+  精确率: 0.3627
+  召回率: 0.2923
+  F1分数: 0.3238
+  AUC: 0.8974
 
 Nodule:
-  Precision: 0.5833
-  Recall: 0.0077
-  F1 Score: 0.0151
-  AUC: 0.7254
+  精确率: 0.1525
+  召回率: 0.4114
+  F1分数: 0.2226
+  AUC: 0.7216
 
 Mass:
-  Precision: 0.7048
-  Recall: 0.0818
-  F1 Score: 0.1465
-  AUC: 0.8442
+  精确率: 0.3846
+  召回率: 0.3757
+  F1分数: 0.3801
+  AUC: 0.8387
 
 Hernia:
-  Precision: 1.0000
-  Recall: 0.0357
-  F1 Score: 0.0690
-  AUC: 0.9291
+  精确率: 0.1707
+  召回率: 0.2500
+  F1分数: 0.2029
+  AUC: 0.9073
 
